@@ -39,7 +39,7 @@ public class registro extends JFrame{
                     int rowsDeleted = statement.executeUpdate(deleteQuery);
 
                     if (rowsDeleted > 0) {
-                        JOptionPane.showMessageDialog(rootPanel, "Registro eliminado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(rootPanel, "Registro eliminado exitosamente....", "Éxito", JOptionPane.INFORMATION_MESSAGE);
                         ingresocedula.setText("");
                         ingresonombre.setText("");
                         ingresofecha.setText("");
@@ -57,48 +57,63 @@ public class registro extends JFrame{
         INGRESARREGISTROButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int id = Integer.parseInt(ingresocodigo.getText());
+                String codigo = ingresocodigo.getText();
                 String cedula = ingresocedula.getText();
                 String nombre = ingresonombre.getText();
-                String fecha = ingresofecha.getText();
+                String nacimiento = ingresofecha.getText();
+                String signo = (String) ingresosigno    .getSelectedItem();
 
-                String query = "INSERT INTO ESTUDIANTES VALUES (" + id + ", '" + cedula + "', " + nombre + ", '" + fecha + "')";
-                try (
-                        Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-                        Statement stmt = conn.createStatement();
-                ) {
-                    stmt.executeUpdate(query);
-                    System.out.println("Nuevo estudiante registrado correctamente.");
+                try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+                    String updateQuery = "INSERT INTO REGISTROS VALUES (" + codigo + ", '" + cedula + "', '" + nombre + "', '" + nacimiento + "', '" + signo + "')";
+
+                    Statement statement = connection.createStatement();
+                    int rowsUpdated = statement.executeUpdate(updateQuery);
+
+                    if (rowsUpdated > 0) {
+                        JOptionPane.showMessageDialog(rootPanel, "Se Ingreso exitosamente....", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(rootPanel, "No se encontró ningún registro con el código ingresado.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
                 } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
+                    ex.printStackTrace();
                 }
             }
         });
         ACTUALIZARREGISTROButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int id = Integer.parseInt(ingresocodigo.getText());
-                String nombre = ingresocedula.getText();
-                String query = "UPDATE ESTUDIANTES SET NOMBRE = '" + nombre + "' WHERE ID = '" + id + "'";
-                try (
-                        Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-                        Statement stmt = conn.createStatement();
-                ) {
-                    int rowsAffected = stmt.executeUpdate(query);
-                    if (rowsAffected > 0) {
-                        System.out.println("Nombre del estudiante actualizado correctamente.");
+                String codigo = ingresocodigo.getText();
+                String cedula = ingresocedula.getText();
+                String nombre = ingresonombre.getText();
+                String nacimiento = ingresofecha.getText();
+                String signo = (String) ingresosigno.getSelectedItem();
+
+                try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+                    String updateQuery = "UPDATE REGISTROS SET Cedula='" + cedula + "', Nombre='" + nombre + "', Nacimiento='" + nacimiento + "', Signo='" + signo + "' WHERE Codigo=" + codigo;
+
+                    Statement statement = connection.createStatement();
+                    int rowsUpdated = statement.executeUpdate(updateQuery);
+
+                    if (rowsUpdated > 0) {
+                        JOptionPane.showMessageDialog(rootPanel, "Registro actualizado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
                     } else {
-                        System.out.println("No se encontró ningún estudiante con el ID especificado.");
+                        JOptionPane.showMessageDialog(rootPanel, "No se encontró ningún registro con el código ingresado.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
+
                 } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
+                    ex.printStackTrace();
                 }
             }
         });
         LIMPIARFORMULARIOButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                ingresocodigo.setText("");
+                ingresocedula.setText("");
+                ingresonombre.setText("");
+                ingresofecha.setText("dia/mes/año");
+                ingresosigno.setSelectedItem("geminis");
             }
         });
         BUSCARPORCODIGOButton.addActionListener(new ActionListener() {
