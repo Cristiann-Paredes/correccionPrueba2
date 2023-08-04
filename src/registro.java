@@ -26,34 +26,30 @@ public class registro extends JFrame{
     static final String QUERY= "SELECT * FROM ESTUDIANTES";
 
     public registro() {
-        try (
-                Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(QUERY);
-        ) {
-            while (rs.next()) {
-                System.out.println("CODIGO: " + rs.getInt("CODIGO"));
-                System.out.println("CEDULA: " + rs.getString("CEDULA"));
-                System.out.println("NOMBRE: " + rs.getString("NOMBRE"));
-                System.out.println("FECHA: " + rs.getString("FECHA"));
-                System.out.println("SIGNO: " + rs.getString("SIGNOSIGNO"));
 
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
         BORRARELREGISTROButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int id = Integer.parseInt(textoPanel.getText());
-                String query = "DELETE FROM ESTUDIANTES WHERE id = " + id;
-                try (
-                        Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-                        Statement stmt = conn.createStatement();
-                ) {
-                    stmt.executeUpdate(query);
+                String codigo = ingresocodigo.getText();
+
+                try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+                    String deleteQuery = "DELETE FROM REGISTROS WHERE Codigo=" + codigo;
+
+                    Statement statement = connection.createStatement();
+                    int rowsDeleted = statement.executeUpdate(deleteQuery);
+
+                    if (rowsDeleted > 0) {
+                        JOptionPane.showMessageDialog(rootPanel, "Registro eliminado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                        ingresocedula.setText("");
+                        ingresonombre.setText("");
+                        ingresofecha.setText("");
+                        ingresosigno.setSelectedItem(null);
+                    } else {
+                        JOptionPane.showMessageDialog(rootPanel, "No se encontró ningún registro con el código ingresado.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
                 } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
+                    ex.printStackTrace();
                 }
             }
         });
@@ -96,6 +92,87 @@ public class registro extends JFrame{
                     }
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
+                }
+            }
+        });
+        LIMPIARFORMULARIOButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+        BUSCARPORCODIGOButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+                    Statement statement = connection.createStatement();
+                    ResultSet resultSet = statement.executeQuery(QUERY + " WHERE Codigo=" + ingresocodigo.getText());
+
+                    if (resultSet.next()) {
+                        ingresocedula.setText(resultSet.getString("cedula"));
+                        ingresonombre.setText(resultSet.getString("nombre"));
+                        ingresofecha.setText(resultSet.getString("nacimiento"));
+
+                    } else {
+                        JOptionPane.showMessageDialog(rootPanel, "No se encontraron resultados para el código ingresado.", "Error", JOptionPane.ERROR_MESSAGE);
+                        ingresocedula.setText("");
+                        ingresonombre.setText("");
+                        ingresofecha.setText("");
+                    }
+
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        BUSCARPORNOMBREButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+                    Statement statement = connection.createStatement();
+                    ResultSet resultSet = statement.executeQuery(QUERY + " WHERE Nombre='" + ingresonombre.getText() + "'");
+
+                    if (resultSet.next()) {
+                        ingresocodigo.setText(resultSet.getString("codigo"));
+                        ingresocedula.setText(resultSet.getString("cedula"));
+                        ingresofecha.setText(resultSet.getString("nacimiento"));
+                        ingresosigno.setSelectedItem(resultSet.getString("signo"));
+
+                    } else {
+                        JOptionPane.showMessageDialog(rootPanel, "No se encontraron resultados para el nombre ingresado.", "Error", JOptionPane.ERROR_MESSAGE);
+                        ingresocedula.setText("");
+                        ingresonombre.setText("");
+                        ingresofecha.setText("");
+                    }
+
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+        BUSCARPORSIGNOButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+                    Statement statement = connection.createStatement();
+                    ResultSet resultSet = statement.executeQuery(QUERY + " WHERE Signo='" + ingresosigno.getSelectedItem() + "'");
+
+                    if (resultSet.next()) {
+                        ingresocodigo.setText(resultSet.getString("codigo"));
+                        ingresocedula.setText(resultSet.getString("cedula"));
+                        ingresonombre.setText(resultSet.getString("nombre"));
+                        ingresofecha.setText(resultSet.getString("nacimiento"));
+
+                    } else {
+                        JOptionPane.showMessageDialog(rootPanel, "No se encontraron resultados para el signo ingresado.", "Error", JOptionPane.ERROR_MESSAGE);
+                        ingresocedula.setText("");
+                        ingresonombre.setText("");
+                        ingresocedula.setText("");
+                    }
+
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
                 }
             }
         });
