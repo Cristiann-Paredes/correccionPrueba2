@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
-//NOMBRE: Cristian Paredes
+
 
 public class registro extends JFrame{
     private JPanel rootPanel;
@@ -20,10 +20,12 @@ public class registro extends JFrame{
     private JButton LIMPIARFORMULARIOButton;
     private JTextField textoPanel;
 
-    static final String DB_URL="jdbc:mysql://localhost/REGISTRO";
-    static final String USER="root";
-    static final String PASS="root_bas3";
-    static final String QUERY= "SELECT * FROM ESTUDIANTES";
+
+    static final String DB_URL = "jdbc:sqlserver://localhost\\DESKTOP-7LFJAGC:1433;databaseName=REGISTRO;instance=SQLEXPRESS;encrypt=false;trustServerCertificate=true;";
+    static final String USER = "sa";
+    static final String PASS = "root";
+    static final String QUERY = "SELECT * FROM ESTUDIANTES";
+
 
     public registro() {
 
@@ -32,23 +34,27 @@ public class registro extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 String codigo = ingresocodigo.getText();
 
-                try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
-                    String deleteQuery = "DELETE FROM REGISTROS WHERE Codigo=" + codigo;
+                try {
+                    Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+                    try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+                        String deleteQuery = "DELETE FROM REGISTROS WHERE Codigo=" + codigo;
 
-                    Statement statement = connection.createStatement();
-                    int rowsDeleted = statement.executeUpdate(deleteQuery);
+                        try (Statement statement = connection.createStatement()) {
+                            int rowsDeleted = statement.executeUpdate(deleteQuery);
 
-                    if (rowsDeleted > 0) {
-                        JOptionPane.showMessageDialog(rootPanel, "Registro eliminado exitosamente....", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                        ingresocedula.setText("");
-                        ingresonombre.setText("");
-                        ingresofecha.setText("");
-                        ingresosigno.setSelectedItem(null);
-                    } else {
-                        JOptionPane.showMessageDialog(rootPanel, "No se encontró ningún registro con el código ingresado.", "Error", JOptionPane.ERROR_MESSAGE);
+                            if (rowsDeleted > 0) {
+                                JOptionPane.showMessageDialog(rootPanel, "Registro eliminado exitosamente....", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                                ingresocedula.setText("");
+                                ingresonombre.setText("");
+                                ingresofecha.setText("");
+                                ingresosigno.setSelectedItem(null);
+                            } else {
+                                JOptionPane.showMessageDialog(rootPanel, "No se encontró ningún registro con el código ingresado.", "Error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
                     }
 
-                } catch (SQLException ex) {
+                } catch (ClassNotFoundException | SQLException ex) {
                     ex.printStackTrace();
                 }
             }
@@ -61,18 +67,19 @@ public class registro extends JFrame{
                 String cedula = ingresocedula.getText();
                 String nombre = ingresonombre.getText();
                 String nacimiento = ingresofecha.getText();
-                String signo = (String) ingresosigno    .getSelectedItem();
+                String signo = (String) ingresosigno.getSelectedItem();
 
                 try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
                     String updateQuery = "INSERT INTO REGISTROS VALUES (" + codigo + ", '" + cedula + "', '" + nombre + "', '" + nacimiento + "', '" + signo + "')";
 
-                    Statement statement = connection.createStatement();
-                    int rowsUpdated = statement.executeUpdate(updateQuery);
+                    try (Statement statement = connection.createStatement()) {
+                        int rowsUpdated = statement.executeUpdate(updateQuery);
 
-                    if (rowsUpdated > 0) {
-                        JOptionPane.showMessageDialog(rootPanel, "Se Ingreso exitosamente....", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(rootPanel, "No se encontró ningún registro con el código ingresado.", "Error", JOptionPane.ERROR_MESSAGE);
+                        if (rowsUpdated > 0) {
+                            JOptionPane.showMessageDialog(rootPanel, "Se Ingresó exitosamente....", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(rootPanel, "No se encontró ningún registro con el código ingresado.", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
                     }
 
                 } catch (SQLException ex) {
@@ -89,7 +96,7 @@ public class registro extends JFrame{
                 String nacimiento = ingresofecha.getText();
                 String signo = (String) ingresosigno.getSelectedItem();
 
-                try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+                try (Connection connection = DriverManager.getConnection(DB_URL)) {
                     String updateQuery = "UPDATE REGISTROS SET Cedula='" + cedula + "', Nombre='" + nombre + "', Nacimiento='" + nacimiento + "', Signo='" + signo + "' WHERE Codigo=" + codigo;
 
                     Statement statement = connection.createStatement();
@@ -119,7 +126,7 @@ public class registro extends JFrame{
         BUSCARPORCODIGOButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+                try (Connection connection = DriverManager.getConnection(DB_URL)) {
                     Statement statement = connection.createStatement();
                     ResultSet resultSet = statement.executeQuery(QUERY + " WHERE Codigo=" + ingresocodigo.getText());
 
@@ -144,7 +151,7 @@ public class registro extends JFrame{
         BUSCARPORNOMBREButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+                try (Connection connection = DriverManager.getConnection(DB_URL)) {
                     Statement statement = connection.createStatement();
                     ResultSet resultSet = statement.executeQuery(QUERY + " WHERE Nombre='" + ingresonombre.getText() + "'");
 
@@ -169,7 +176,7 @@ public class registro extends JFrame{
         BUSCARPORSIGNOButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try (Connection connection = DriverManager.getConnection(DB_URL, USER, PASS)) {
+                try (Connection connection = DriverManager.getConnection(DB_URL)) {
                     Statement statement = connection.createStatement();
                     ResultSet resultSet = statement.executeQuery(QUERY + " WHERE Signo='" + ingresosigno.getSelectedItem() + "'");
 
